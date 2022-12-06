@@ -97,8 +97,8 @@ public class SurveyRepositoryTest {
 
     @Test
     public void getSurveyWithName() {
-        Survey result = repository.findByName("SurveyName1");
-        Assertions.assertNotNull(result);
+        Survey survey = repository.findByName("SurveyName1").orElse(null);
+        Assertions.assertNotNull(survey);
     }
 
     @Test

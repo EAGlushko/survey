@@ -46,7 +46,7 @@ public class SurveyService extends BaseService<Survey> {
     }
 
     public Optional<Survey> findByName(String name) {
-        return Optional.of(surveyRepository.findByName(name));
+        return surveyRepository.findByName(name);
     }
 
     public List<Survey> findAllOnPage(Pageable page) {

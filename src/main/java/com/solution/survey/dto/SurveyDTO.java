@@ -5,6 +5,7 @@ import com.solution.survey.model.entity.Survey;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,7 +20,7 @@ public class SurveyDTO {
     private String description;
 
     @Valid
-    private List<QuestionDTO> questions;
+    private List<QuestionDTO> questions = new ArrayList<>();
 
     public SurveyDTO() {
 

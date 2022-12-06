@@ -3,6 +3,7 @@ package com.solution.survey.model.entity;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -24,7 +25,7 @@ public class Question extends BaseEntity {
 
     @OneToMany(mappedBy = "question", fetch = FetchType.LAZY,
             cascade = CascadeType.ALL)
-    private List<AnswerOption> answerOptions;
+    private List<AnswerOption> answerOptions = new ArrayList<>();
 
     public List<AnswerOption> getAnswerOptions() {
         return answerOptions;

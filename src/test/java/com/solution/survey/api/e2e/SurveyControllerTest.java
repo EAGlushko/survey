@@ -5,6 +5,8 @@ import com.solution.survey.dto.AnswerOptionDTO;
 import com.solution.survey.dto.PageDTO;
 import com.solution.survey.dto.QuestionDTO;
 import com.solution.survey.dto.SurveyDTO;
+import com.solution.survey.model.entity.Survey;
+import com.solution.survey.repository.SurveyRepository;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -16,6 +18,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.*;
 import org.springframework.jdbc.datasource.init.ScriptUtils;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -34,6 +37,9 @@ public class SurveyControllerTest {
 
     @Autowired
     private TestRestTemplate client;
+
+    @Autowired
+    private SurveyRepository surveyRepository;
 
     @AfterAll
     static void cleanup(@Autowired DataSource dataSource) {
@@ -104,7 +110,16 @@ public class SurveyControllerTest {
 
     @Test
     public void findByName() {
-        ResponseEntity<SurveyDTO> response = client.exchange("/surveys/find/byName/SurveyName1", HttpMethod.GET, null, SurveyDTO.class);
+        ResponseEntity<SurveyDTO> response = client.exchange("/surveys/find/byName/SurveyName2", HttpMethod.GET, null, SurveyDTO.class);
+        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+        Assertions.assertNotNull(response.getBody());
+    }
+
+    @Test
+    public void findById() {
+        Survey survey = surveyRepository.findByName("SurveyName1").orElse(null);
+        Assertions.assertNotNull(survey);
+        ResponseEntity<SurveyDTO> response = client.exchange("/surveys/get/byId/" + survey.getId(), HttpMethod.GET, null, SurveyDTO.class);
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
         Assertions.assertNotNull(response.getBody());
     }
@@ -131,6 +146,33 @@ public class SurveyControllerTest {
         Assertions.assertNotNull(response.getBody().getId());
         Assertions.assertNotNull(response.getBody().getQuestions());
         Assertions.assertNotNull(response.getBody().getQuestions().get(0).getId());
+        Assertions.assertNotNull(response.getBody().getQuestions().get(0).getAnswerOptions());
+        Assertions.assertNotNull(response.getBody().getQuestions().get(0).getAnswerOptions().get(0).getId());
+    }
+
+
+    @Transactional
+    @Test
+    public void updateSurvey() {
+        Survey survey = surveyRepository.findByName("SurveyName1").orElse(null);
+        Assertions.assertNotNull(survey);
+        SurveyDTO surveyDTO = SurveyDTO.createFromSurvey(survey, true);
+        surveyDTO.setDescription("UPDATE");
+        surveyDTO.getQuestions().get(0).setEnabled(false);
+
+        QuestionDTO questionDTO = new QuestionDTO();
+        questionDTO.setText("questionUPDATEText");
+
+        surveyDTO.getQuestions().add(questionDTO);
+
+        HttpEntity<SurveyDTO> request = new HttpEntity<>(surveyDTO, headers);
+        ResponseEntity<SurveyDTO> response = client.exchange("/surveys/update", HttpMethod.POST, request, SurveyDTO.class);
+        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+        Assertions.assertNotNull(response.getBody());
+        Assertions.assertNotNull(response.getBody().getId());
+        Assertions.assertEquals("UPDATE",response.getBody().getDescription());
+        Assertions.assertNotNull(response.getBody().getQuestions());
+        Assertions.assertEquals(4,response.getBody().getQuestions().size());
         Assertions.assertNotNull(response.getBody().getQuestions().get(0).getAnswerOptions());
         Assertions.assertNotNull(response.getBody().getQuestions().get(0).getAnswerOptions().get(0).getId());
     }

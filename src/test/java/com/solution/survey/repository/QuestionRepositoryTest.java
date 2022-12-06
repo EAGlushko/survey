@@ -72,7 +72,8 @@ public class QuestionRepositoryTest {
 
     @Test
     public void saveQuestion() {
-        Survey survey = surveyRepository.findByName("SurveyName1");
+        Survey survey = surveyRepository.findByName("SurveyName1").orElse(null);
+        Assertions.assertNotNull(survey);
         question.setSurvey(survey);
         Question result = questionRepository.saveAndFlush(question);
         Assertions.assertNotNull(result);
@@ -96,7 +97,8 @@ public class QuestionRepositoryTest {
 
     @Test
     public void getExceptionWhenTextIsNull() {
-        Survey survey = surveyRepository.findByName("SurveyName1");
+        Survey survey = surveyRepository.findByName("SurveyName1").orElse(null);
+        Assertions.assertNotNull(survey);
         Question badQuestion = new Question();
         badQuestion.setText("");
         badQuestion.setSurvey(survey);
